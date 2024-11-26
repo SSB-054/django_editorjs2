@@ -1,0 +1,37 @@
+[tool.poetry]
+name = "django-editorjs2"
+version = "0.1.0"
+description = "Django plugin for using Editor.js v2"
+authors = ["Suraj Singh Bisht <surajsinghbisht054@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+# Metadata for discoverability
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+# Homepage and repository links
+homepage = "https://github.com/surajsinghbisht054/django_editorjs2"
+repository = "https://github.com/surajsinghbisht054/django_editorjs2"
+documentation = "https://github.com/surajsinghbisht054/django_editorjs2/blob/main/README.md"
+
+keywords = ["django", "editorjs2", "editorjs", "django-editorjs"]
+
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+django = ">=3.2"
+nh3 = ">=0.2.15"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
