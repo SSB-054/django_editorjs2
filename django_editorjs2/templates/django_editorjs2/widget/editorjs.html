@@ -1,0 +1,125 @@
+{% load static %}
+<style>
+    .codex-editor {
+        border: 1px solid #ecf0f1;
+        border-radius: 4px;
+        padding: 1.15rem;
+        min-width: 420px;
+    }
+</style>
+<textarea style="display: none;" {% include "django/forms/widgets/attrs.html" %} name="{{ widget.name }}"></textarea>
+<div id="editorjs-{{ widget.name }}"></div>
+{% with "editorJs_initial_json_"|add:widget.name as editorJs_initial_json %}
+{{ widget.value|json_script:editorJs_initial_json }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get CSRF token from cookie
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function uploadByFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            return fetch(
+                "{% url 'django_editorjs2:attachments' %}",
+                {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: formData
+                }
+            ).then(response => response.json())
+        }
+        const initial_json = JSON.parse(JSON.parse(document.getElementById('{{editorJs_initial_json}}').textContent))|| {};
+        const editor = new EditorJS({
+            holder: 'editorjs-{{ widget.name }}',
+            autofocus: true,
+            data: initial_json,
+            tools: {
+                header: {
+                    class: Header,
+                    config: {
+                        placeholder: "Enter a header",
+                        levels: [2, 3, 4],
+                        defaultLevel: 3,
+                    },
+                },
+
+                list: {
+                    class: List,
+                    inlineToolbar: true,
+                },
+                checklist: {
+                    class: Checklist,
+                    inlineToolbar: true,
+                },
+                quote: {
+                    class: Quote,
+                    inlineToolbar: true,
+                    config: {
+                        quotePlaceholder: "Enter a quote",
+                        captionPlaceholder: "Quote's author",
+                    },
+                },
+                code: CodeTool,
+                marker: {
+                    class: Marker,
+                    shortcut: "CMD+SHIFT+M",
+                },
+                table: {
+                    class: Table,
+                    inlineToolbar: true,
+                    config: {
+                        rows: 2,
+                        cols: 3,
+                    },
+                },
+                image: {
+                    class: ImageTool,
+                    config: {
+                        uploader: {
+                            uploadByFile
+                        },
+                        field: "image",
+                        types: "image/*",
+                    },
+                },
+                embed: Embed,
+                delimiter: Delimiter,
+                attaches: {
+                    class: AttachesTool,
+                    config: {
+                        uploader: {
+                            uploadByFile
+                        },
+
+                    },
+                },
+            },
+            onChange: function () {
+                editor.save().then((outputData) => {
+                    document.querySelector('[name="{{ widget.name }}"]').value = JSON.stringify(outputData);
+                }).catch((error) => {
+                    console.error('Saving failed:', error);
+                });
+            },
+        });
+
+    })
+
+</script>
+{% endwith %}

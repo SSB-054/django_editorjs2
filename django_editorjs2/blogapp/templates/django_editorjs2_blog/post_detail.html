@@ -1,0 +1,9 @@
+{% extends "django_editorjs2_blog/base.html" %}
+
+{% block content %}
+<h1>{{ post.title }}</h1>
+    <div id="content">{{ post.content_preview }}</div>
+    <p>Created: {{ post.created_at }}</p>
+    <p>Last updated: {{ post.updated_at }}</p>
+    <a href="{% url 'django_editorjs2_blogapp:post_update' post.pk %}">Edit</a>
+{% endblock %}

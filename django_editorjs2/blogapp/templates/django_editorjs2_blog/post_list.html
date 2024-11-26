@@ -1,0 +1,18 @@
+{% extends "django_editorjs2_blog/base.html" %}
+
+{% block content %}
+
+<ul>
+    {% for article in object_list %}
+        <li>
+            <h3>{{ article.title }} </h3>
+            <a href="{% url 'django_editorjs2_blogapp:post_detail' article.pk %}">View</a>
+        </li>
+        
+    {% empty %}
+        <li>No articles yet.</li>
+    {% endfor %}
+    </ul>
+
+    <a href="{% url 'django_editorjs2_blogapp:post_create' %}">New Post</a>
+{% endblock %}
