@@ -25,10 +25,10 @@ class BlockEditorConverter:
             'code': self._convert_code,
             'image': self._convert_image,
             'embed': self._convert_embed,
-             'checklist': self._convert_checklist,
+            'checklist': self._convert_checklist,
             'table': self._convert_table,
             'delimiter': self._convert_delimiter,
-            'attachment': self._convert_attachment
+            'attaches': self._convert_attachment
         }
     
     def _convert_checklist(self, block: Dict[str, Any]) -> Optional[str]:
@@ -73,6 +73,8 @@ class BlockEditorConverter:
         {
             "type": "table",
             "data": {
+                stretched: false,
+                withHeadings: true,
                 "content": [
                     ["Header 1", "Header 2"],
                     ["Row 1, Cell 1", "Row 1, Cell 2"],
@@ -81,18 +83,31 @@ class BlockEditorConverter:
             }
         }
         """
-        content = block.get('data', {}).get('content', [])
+        # Extract data with default values
+        data = block.get('data', {})
+        content = data.get('content', [])
+        
+        # Handle new variables with explicit checks
+        stretched = data.get('stretched', False)
+        with_headings = data.get('withHeadings', True)
         
         if not content:
             return None
+    
+        # Determine table classes based on new variables
+        table_classes = ["block-editor-table"]
+        if stretched:
+            table_classes.append("block-editor-table-stretched")
         
-        # First row is considered headers
-        headers = content[0]
-        body_rows = content[1:]
-        
-        # Generate table headers
-        headers_html = ''.join(f'<th>{self._sanitize_html(header)}</th>' for header in headers)
-        header_row = f'<thead><tr>{headers_html}</tr></thead>'
+        # Generate table headers (only if with_headings is True)
+        if with_headings and content:
+            headers = content[0]
+            headers_html = ''.join(f'<th>{self._sanitize_html(header)}</th>' for header in headers)
+            header_row = f'<thead><tr>{headers_html}</tr></thead>'
+            body_rows = content[1:]
+        else:
+            header_row = ''
+            body_rows = content
         
         # Generate table body rows
         body_rows_html = []
@@ -102,7 +117,8 @@ class BlockEditorConverter:
         
         body_html = f'<tbody>{"".join(body_rows_html)}</tbody>'
         
-        return f'<table class="block-editor-table">{header_row}{body_html}</table>'
+        # Construct the final table HTML with dynamic classes
+        return f'<table class="{" ".join(table_classes)}">{header_row}{body_html}</table>'
     
     def _convert_delimiter(self, block: Dict[str, Any]) -> str:
         """
@@ -130,7 +146,7 @@ class BlockEditorConverter:
         }
         """
         file_data = block.get('data', {}).get('file', {})
-        caption = block.get('data', {}).get('caption', '')
+        title = block.get('data', {}).get('title', '')
         
         url = file_data.get('url', '')
         name = file_data.get('name', 'Attachment')
@@ -146,13 +162,10 @@ class BlockEditorConverter:
         attachment_html = (
             f'<div class="block-editor-attachment">'
             f'  <a href="{url}" target="_blank" download>'
-            f'    📄 {self._sanitize_html(name)} ({readable_size})'
+            f'    📄 {self._sanitize_html(title)} ({readable_size})'
             f'  </a>'
         )
-        
-        if caption:
-            attachment_html += f'  <p class="attachment-caption">{self._sanitize_html(caption)}</p>'
-        
+                
         attachment_html += '</div>'
         
         return attachment_html    
@@ -228,14 +241,51 @@ class BlockEditorConverter:
     
     def _convert_image(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert image block to HTML"""
-        url = block.get('data', {}).get('file', {}).get('url', '')
-        caption = block.get('data', {}).get('caption', '')
+        # Extract data with default values
+        data = block.get('data', {})
+        
+        # Extract file information
+        file_info = data.get('file', {})
+        url = file_info.get('url', '')
+        
+        # Extract other block properties
+        caption = data.get('caption', '')
+        stretched = data.get('stretched', False)
+        with_background = data.get('withBackground', False)
+        with_border = data.get('withBorder', False)
+        
+        # Early return if no URL
         if not url:
             return None
         
-        img_html = f'<img src="{url}" alt="{self._sanitize_html(caption)}" style="">'
-        if caption:
-            img_html = f'<figure>{img_html}<figcaption>{self._sanitize_html(caption)}</figcaption></figure>'
+        # Prepare inline styles
+        img_styles = ['max-width: min(600px, 100%);']
+        figure_styles = []
+        
+        if stretched:
+            img_styles.append('max-width: 100%; width: 100%; height: auto;')
+        
+        if with_background:
+            figure_styles.append('background-color: rgba(0, 0, 0, 0.1); padding: 10px;')
+        
+        if with_border:
+            figure_styles.append('border: 1px solid #000; padding: 10px;')
+        
+        # Construct style attributes
+        img_style_attr = f' style="{" ".join(img_styles)}"' if img_styles else ''
+        figure_style_attr = f' style="{" ".join(figure_styles)}"' if figure_styles else ''
+        
+        # Create image HTML
+        img_html = f'<img src="{url}" alt="{self._sanitize_html(caption)}"{img_style_attr}>'
+        
+        # Wrap with figure if there's a caption or additional styles
+        if caption or figure_styles:
+            img_html = f'<figure{figure_style_attr}>{img_html}'
+            
+            if caption:
+                img_html += f'<figcaption>{self._sanitize_html(caption)}</figcaption>'
+            
+            img_html += '</figure>'
         
         return img_html
     

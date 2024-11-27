@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-editorjs2"
-version = "0.2.0"
+version = "0.2.1"
 description = "Django plugin for using Editor.js v2"
 authors = ["Suraj Singh Bisht <surajsinghbisht054@gmail.com>"]
 license = "MIT"
