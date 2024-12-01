@@ -47,10 +47,10 @@ ATTACHMENT_FILE_EXTENSIONS = [
 MAX_ATTACHMENT_SIZE_BYTES = 5 * 1024 * 1024  # 5 MiB
 
 
-def custom_upload_to(instance, filename):
+def custom_upload_to(*args, **kwargs):
     random_str = uuid.uuid4().hex
-    new_filename = f"{random_str}_{filename}"
-    return os.path.join("django_editorjs2", "files", new_filename)
+    new_filename = f"{random_str}"
+    return os.path.join("djeditorjs2", "files", new_filename)
 
 
 class EditorJsUploadFiles(models.Model):
