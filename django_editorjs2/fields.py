@@ -4,6 +4,34 @@ from django import forms
 from django.templatetags.static import static
 from django.utils.safestring import mark_safe
 from django_editorjs2.block_processor import converter
+from django.conf import settings
+from django.utils.module_loading import import_string
+converter.image_link_preprocessor = lambda x: x
+converter.download_link_preprocessor = lambda x: x
+converter.extra_attributes = {
+    'paragraph': {},
+    'header': {},
+    'list': {},
+    'quote': {},
+    'code': {},
+    'image': {},
+    'embed': {},
+    'checklist': {},
+    'table': {},
+    'delimiter': {},
+    'attachment': {},
+}
+
+if hasattr(settings, 'DJANGO_EDITORJS2_CONFIG'):
+    if 'image_link_preprocessor' in settings.DJANGO_EDITORJS2_CONFIG:
+        converter.image_link_preprocessor = import_string(settings.DJANGO_EDITORJS2_CONFIG['image_link_preprocessor'])
+        
+    if 'download_link_preprocessor' in settings.DJANGO_EDITORJS2_CONFIG:
+        converter.download_link_preprocessor = import_string(settings.DJANGO_EDITORJS2_CONFIG['download_link_preprocessor'])
+        
+    if 'extra_attributes' in settings.DJANGO_EDITORJS2_CONFIG:
+        converter.extra_attributes.update(settings.DJANGO_EDITORJS2_CONFIG['extra_attributes'])
+
 
 class EditorJsWidget(forms.Widget):
     template_name = "django_editorjs2/widget/editorjs.html"

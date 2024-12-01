@@ -1,4 +1,4 @@
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any, Optional
 import nh3
 
 # Convert size to human-readable format
@@ -16,6 +16,22 @@ class BlockEditorConverter:
     """
     
     def __init__(self):
+        self.image_link_preprocessor = lambda x: x
+        self.download_link_preprocessor = lambda x: x
+        self.extra_attributes = {
+            'paragraph': {'check':'true',},
+            'header': {'check':'true',},
+            'list': {'check':'true',},
+            'quote': {'check':'true',},
+            'code': {'check':'true',},
+            'image': {'check':'true',},
+            'embed': {'check':'true',},
+            'checklist': {'check':'true','style': 'list-style: none;'},
+            'table': {'check':'true',},
+            'delimiter': {'check':'true',},
+            'attaches': {'check':'true',},
+        }
+        
         # Default block type handlers
         self._block_handlers = {
             'paragraph': self._convert_paragraph,
@@ -28,9 +44,18 @@ class BlockEditorConverter:
             'checklist': self._convert_checklist,
             'table': self._convert_table,
             'delimiter': self._convert_delimiter,
-            'attaches': self._convert_attachment
+            'attaches': self._convert_attaches
         }
     
+    def serialize_attributes(self, name, **kwargs):
+        attr = ''
+        if name in self.extra_attributes:
+            for key, value in self.extra_attributes[name].items():
+                attr += f'{key}="{value}" '
+        for key, value in kwargs.items():
+            attr += f'{key}="{value}" '
+        return attr
+        
     def _convert_checklist(self, block: Dict[str, Any]) -> Optional[str]:
         """
         Convert checklist block to HTML
@@ -63,7 +88,7 @@ class BlockEditorConverter:
             )
             checklist_items.append(f'<li>{checkbox}</li>')
         
-        return f'<ul style="list-style: none;">{" ".join(checklist_items)}</ul>'
+        return f'<ul {self.serialize_attributes('checklist')}>{" ".join(checklist_items)}</ul>'
     
     def _convert_table(self, block: Dict[str, Any]) -> Optional[str]:
         """
@@ -118,7 +143,7 @@ class BlockEditorConverter:
         body_html = f'<tbody>{"".join(body_rows_html)}</tbody>'
         
         # Construct the final table HTML with dynamic classes
-        return f'<table class="{" ".join(table_classes)}">{header_row}{body_html}</table>'
+        return f'<table class="{" ".join(table_classes)}" {self.serialize_attributes('table')}>{header_row}{body_html}</table>'
     
     def _convert_delimiter(self, block: Dict[str, Any]) -> str:
         """
@@ -126,15 +151,15 @@ class BlockEditorConverter:
         
         Simple horizontal rule to separate content
         """
-        return '<hr class="block-editor-delimiter" />'
+        return f'<hr class="block-editor-delimiter" {self.serialize_attributes('delimiter')} />'
     
-    def _convert_attachment(self, block: Dict[str, Any]) -> Optional[str]:
+    def _convert_attaches(self, block: Dict[str, Any]) -> Optional[str]:
         """
-        Convert attachment block to HTML
+        Convert attaches block to HTML
         
         Example block structure:
         {
-            "type": "attachment",
+            "type": "attaches",
             "data": {
                 "file": {
                     "url": "https://example.com/file.pdf",
@@ -149,7 +174,6 @@ class BlockEditorConverter:
         title = block.get('data', {}).get('title', '')
         
         url = file_data.get('url', '')
-        name = file_data.get('name', 'Attachment')
         size = file_data.get('size', 0)
         
         if not url:
@@ -158,17 +182,17 @@ class BlockEditorConverter:
         
         
         readable_size = human_readable_size(size)
-        
-        attachment_html = (
-            f'<div class="block-editor-attachment">'
+        url = self.download_link_preprocessor(url)
+        attaches_html = (
+            f'<div class="block-editor-attaches" {self.serialize_attributes('attaches')}>'
             f'  <a href="{url}" target="_blank" download>'
-            f'    📄 {self._sanitize_html(title)} ({readable_size})'
+            f'    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> {self._sanitize_html(title)} ({readable_size})'
             f'  </a>'
         )
                 
-        attachment_html += '</div>'
+        attaches_html += '</div>'
         
-        return attachment_html    
+        return attaches_html    
     
     def _convert_blocks(self, block_data: Dict[str, Any]) -> str:
         """
@@ -187,19 +211,19 @@ class BlockEditorConverter:
                 yield handler(block)
     
     def convert(self, block_data: Dict[str, Any]) -> str:
-        return "".join(self._convert_blocks(block_data))
+        return "\n".join(self._convert_blocks(block_data))
     
     def _convert_paragraph(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert paragraph block to HTML"""
         text = block.get('data', {}).get('text', '')
-        return f'<p>{self._sanitize_html(text)}</p>' if text else None
+        return f'<p {self.serialize_attributes('paragraph')}>{self._sanitize_html(text)}</p>' if text else None
     
     def _convert_header(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert header block to HTML"""
         text = block.get('data', {}).get('text', '')
         level = block.get('data', {}).get('level', 2)
         level = max(1, min(level, 6))  # Ensure header is between h1-h6
-        return f'<h{level}>{self._sanitize_html(text)}</h{level}>' if text else None
+        return f'<h{level} {self.serialize_attributes('header')}>{self._sanitize_html(text)}</h{level}>' if text else None
     
     def _convert_list(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert list block to HTML"""
@@ -211,7 +235,7 @@ class BlockEditorConverter:
         
         list_tag = 'ul' if style == 'unordered' else 'ol'
         list_items = ''.join(f'<li>{self._sanitize_html(item)}</li>' for item in items)
-        return f'<{list_tag}>{list_items}</{list_tag}>'
+        return f'<{list_tag} {self.serialize_attributes('list')}>{list_items}</{list_tag}>'
     
     def _convert_quote(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert quote block to HTML"""
@@ -221,7 +245,7 @@ class BlockEditorConverter:
         if not text:
             return None
         
-        quote_html = f'<blockquote>{self._sanitize_html(text)}</blockquote>'
+        quote_html = f'<blockquote {self.serialize_attributes('quote')}>{self._sanitize_html(text)}</blockquote>'
         if caption:
             quote_html += f'<cite>{self._sanitize_html(caption)}</cite>'
         
@@ -237,7 +261,7 @@ class BlockEditorConverter:
         
         # Optional language class for syntax highlighting
         lang_class = f' class="language-{language}"' if language else ''
-        return f'<pre><code{lang_class}>{self._sanitize_html(code)}</code></pre>'
+        return f'<pre {self.serialize_attributes('code')}><code{lang_class}>{self._sanitize_html(code)}</code></pre>'
     
     def _convert_image(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert image block to HTML"""
@@ -247,7 +271,7 @@ class BlockEditorConverter:
         # Extract file information
         file_info = data.get('file', {})
         url = file_info.get('url', '')
-        
+        url = self.image_link_preprocessor(url)
         # Extract other block properties
         caption = data.get('caption', '')
         stretched = data.get('stretched', False)
@@ -269,7 +293,7 @@ class BlockEditorConverter:
             figure_styles.append('background-color: rgba(0, 0, 0, 0.1); padding: 10px;')
         
         if with_border:
-            figure_styles.append('border: 1px solid #000; padding: 10px;')
+            figure_styles.append('border: 1px solid var(#dfe7ef); padding: 10px;')
         
         # Construct style attributes
         img_style_attr = f' style="{" ".join(img_styles)}"' if img_styles else ''
@@ -280,7 +304,7 @@ class BlockEditorConverter:
         
         # Wrap with figure if there's a caption or additional styles
         if caption or figure_styles:
-            img_html = f'<figure{figure_style_attr}>{img_html}'
+            img_html = f'<figure{figure_style_attr} {self.serialize_attributes('image')}>{img_html}'
             
             if caption:
                 img_html += f'<figcaption>{self._sanitize_html(caption)}</figcaption>'
@@ -299,9 +323,9 @@ class BlockEditorConverter:
         
         # Basic embed handlers for common services
         if service == 'youtube':
-            return f'<iframe src="https://www.youtube.com/embed/{source}" allowfullscreen></iframe>'
+            return f'<iframe {self.serialize_attributes('embed')} src="https://www.youtube.com/embed/{source}" allowfullscreen></iframe>'
         elif service == 'vimeo':
-            return f'<iframe src="https://player.vimeo.com/video/{source}" allowfullscreen></iframe>'
+            return f'<iframe {self.serialize_attributes('embed')} src="https://player.vimeo.com/video/{source}" allowfullscreen></iframe>'
         
         return None
     
