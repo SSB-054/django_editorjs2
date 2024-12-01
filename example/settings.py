@@ -149,4 +149,8 @@ DJANGO_EDITORJS2_CONFIG = {
     # before returning the response, the response object is passed to this function
     "callback_before_return_response": "django_editorjs2.blogapp.utils.callback_before_return_response",
     
+    # widget
+    "editorjs_field_preview_callback": "django_editorjs2.blogapp.utils.editorjs_field_preview_callback",
+    "editorjs_field_save_callback": "django_editorjs2.blogapp.utils.editorjs_field_save_callback",
+    
 }

@@ -25,3 +25,17 @@ def callback_before_return_response(response):
     """
     print(response)
     return response
+
+def editorjs_field_preview_callback(value):
+    """
+    Preprocess value for widget preview.
+    """
+    print(value)
+    return value
+
+def editorjs_field_save_callback(value):
+    """
+    Preprocess value before saving it.
+    """
+    print(value)
+    return value

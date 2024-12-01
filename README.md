@@ -64,6 +64,16 @@ python manage.py migrate
 python manage.py collectstatic
 ```
 
+
+### 6. Add static tag
+```html
+<head>
+....
+{{form.media}}
+....
+</head>
+```
+
 ## Configuration
 
 ### Advanced Configuration Options

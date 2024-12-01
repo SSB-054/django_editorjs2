@@ -44,8 +44,7 @@
                 }
             ).then(response => response.json())
         }
-        const initial_json = JSON.parse(JSON.parse(document.getElementById('{{editorJs_initial_json}}').textContent))|| {};
-        console.log(initial_json);
+        const initial_json = JSON.parse(document.getElementById('{{editorJs_initial_json}}').textContent)|| {};
         const editor = new EditorJS({
             holder: 'editorjs-{{ widget.name }}',
             autofocus: true,
