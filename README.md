@@ -106,6 +106,11 @@ from django.db import models
 class Article(models.Model):
     title = models.CharField(max_length=200)
     content = EditorJsField()
+    
+# you can get preview like this
+article = Article.objects.first()
+# this will render html
+article.content_preview()
 ```
 
 ## Custom Preprocessors and Callbacks
