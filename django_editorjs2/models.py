@@ -46,6 +46,16 @@ ATTACHMENT_FILE_EXTENSIONS = [
 ]
 MAX_ATTACHMENT_SIZE_BYTES = 5 * 1024 * 1024  # 5 MiB
 
+if hasattr(settings, "DJANGO_EDITORJS2_CONFIG"):
+    if "attachment_file_extensions" in settings.DJANGO_EDITORJS2_CONFIG:
+        ATTACHMENT_FILE_EXTENSIONS = settings.DJANGO_EDITORJS2_CONFIG[
+            "attachment_file_extensions"
+        ]
+        
+    if "max_attachment_size_bytes" in settings.DJANGO_EDITORJS2_CONFIG:
+        MAX_ATTACHMENT_SIZE_BYTES = settings.DJANGO_EDITORJS2_CONFIG[
+            "max_attachment_size_bytes"
+        ]
 
 def custom_upload_to(instance, filename):
     random_str = uuid.uuid4().hex

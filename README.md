@@ -109,6 +109,10 @@ DJANGO_EDITORJS2_CONFIG = {
     # widget
     "editorjs_field_preview_callback": "django_editorjs2.blogapp.utils.editorjs_field_preview_callback",
     "editorjs_field_save_callback": "django_editorjs2.blogapp.utils.editorjs_field_save_callback",
+
+    "max_attachment_size_bytes": 5 * 1024 * 1024,  # 5 MiB
+    "attachment_file_extensions": ["zip","doc","docx",]
+
 }
 ```
 

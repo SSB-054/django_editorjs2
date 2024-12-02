@@ -88,7 +88,7 @@ class BlockEditorConverter:
             )
             checklist_items.append(f'<li>{checkbox}</li>')
         
-        return f'<ul {self.serialize_attributes('checklist')}>{" ".join(checklist_items)}</ul>'
+        return f'<ul {self.serialize_attributes("checklist")}>{" ".join(checklist_items)}</ul>'
     
     def _convert_table(self, block: Dict[str, Any]) -> Optional[str]:
         """
@@ -143,7 +143,7 @@ class BlockEditorConverter:
         body_html = f'<tbody>{"".join(body_rows_html)}</tbody>'
         
         # Construct the final table HTML with dynamic classes
-        return f'<table class="{" ".join(table_classes)}" {self.serialize_attributes('table')}>{header_row}{body_html}</table>'
+        return f'<table class="{" ".join(table_classes)}" {self.serialize_attributes("table")}>{header_row}{body_html}</table>'
     
     def _convert_delimiter(self, block: Dict[str, Any]) -> str:
         """
@@ -151,7 +151,7 @@ class BlockEditorConverter:
         
         Simple horizontal rule to separate content
         """
-        return f'<hr class="block-editor-delimiter" {self.serialize_attributes('delimiter')} />'
+        return f'<hr class="block-editor-delimiter" {self.serialize_attributes("delimiter")} />'
     
     def _convert_attaches(self, block: Dict[str, Any]) -> Optional[str]:
         """
@@ -184,7 +184,7 @@ class BlockEditorConverter:
         readable_size = human_readable_size(size)
         url = self.download_link_preprocessor(url)
         attaches_html = (
-            f'<div class="block-editor-attaches" {self.serialize_attributes('attaches')}>'
+            f'<div class="block-editor-attaches" {self.serialize_attributes("attaches")}>'
             f'  <a href="{url}" target="_blank" download>'
             f'    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg> {self._sanitize_html(title)} ({readable_size})'
             f'  </a>'
@@ -216,14 +216,14 @@ class BlockEditorConverter:
     def _convert_paragraph(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert paragraph block to HTML"""
         text = block.get('data', {}).get('text', '')
-        return f'<p {self.serialize_attributes('paragraph')}>{self._sanitize_html(text)}</p>' if text else None
+        return f'<p {self.serialize_attributes("paragraph")}>{self._sanitize_html(text)}</p>' if text else None
     
     def _convert_header(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert header block to HTML"""
         text = block.get('data', {}).get('text', '')
         level = block.get('data', {}).get('level', 2)
         level = max(1, min(level, 6))  # Ensure header is between h1-h6
-        return f'<h{level} {self.serialize_attributes('header')}>{self._sanitize_html(text)}</h{level}>' if text else None
+        return f'<h{level} {self.serialize_attributes("header")}>{self._sanitize_html(text)}</h{level}>' if text else None
     
     def _convert_list(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert list block to HTML"""
@@ -235,7 +235,7 @@ class BlockEditorConverter:
         
         list_tag = 'ul' if style == 'unordered' else 'ol'
         list_items = ''.join(f'<li>{self._sanitize_html(item)}</li>' for item in items)
-        return f'<{list_tag} {self.serialize_attributes('list')}>{list_items}</{list_tag}>'
+        return f'<{list_tag} {self.serialize_attributes("list")}>{list_items}</{list_tag}>'
     
     def _convert_quote(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert quote block to HTML"""
@@ -245,7 +245,7 @@ class BlockEditorConverter:
         if not text:
             return None
         
-        quote_html = f'<blockquote {self.serialize_attributes('quote')}>{self._sanitize_html(text)}</blockquote>'
+        quote_html = f'<blockquote {self.serialize_attributes("quote")}>{self._sanitize_html(text)}</blockquote>'
         if caption:
             quote_html += f'<cite>{self._sanitize_html(caption)}</cite>'
         
@@ -261,7 +261,7 @@ class BlockEditorConverter:
         
         # Optional language class for syntax highlighting
         lang_class = f' class="language-{language}"' if language else ''
-        return f'<pre {self.serialize_attributes('code')}><code{lang_class}>{self._sanitize_html(code)}</code></pre>'
+        return f'<pre {self.serialize_attributes("code")}><code{lang_class}>{self._sanitize_html(code)}</code></pre>'
     
     def _convert_image(self, block: Dict[str, Any]) -> Optional[str]:
         """Convert image block to HTML"""
@@ -304,7 +304,7 @@ class BlockEditorConverter:
         
         # Wrap with figure if there's a caption or additional styles
         if caption or figure_styles:
-            img_html = f'<figure{figure_style_attr} {self.serialize_attributes('image')}>{img_html}'
+            img_html = f'<figure{figure_style_attr} {self.serialize_attributes("image")}>{img_html}'
             
             if caption:
                 img_html += f'<figcaption>{self._sanitize_html(caption)}</figcaption>'
@@ -323,9 +323,9 @@ class BlockEditorConverter:
         
         # Basic embed handlers for common services
         if service == 'youtube':
-            return f'<iframe {self.serialize_attributes('embed')} src="https://www.youtube.com/embed/{source}" allowfullscreen></iframe>'
+            return f'<iframe {self.serialize_attributes("embed")} src="https://www.youtube.com/embed/{source}" allowfullscreen></iframe>'
         elif service == 'vimeo':
-            return f'<iframe {self.serialize_attributes('embed')} src="https://player.vimeo.com/video/{source}" allowfullscreen></iframe>'
+            return f'<iframe {self.serialize_attributes("embed")} src="https://player.vimeo.com/video/{source}" allowfullscreen></iframe>'
         
         return None
     
