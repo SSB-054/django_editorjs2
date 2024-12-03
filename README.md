@@ -2,6 +2,8 @@
 A Django app that seamlessly integrates EditorJS, a powerful block-styled editor with a clean, intuitive interface.
 
 
+![Admin Panel Screenshot](./django_editorjs2/screenshot.png?raw=true)
+
 # Django EditorJS2
 
 A Django app that seamlessly integrates [EditorJS](https://editorjs.io/), a powerful block-styled editor with a clean, intuitive interface.
