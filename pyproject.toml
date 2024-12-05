@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-editorjs2"
-version = "0.3.3"
+version = "0.3.5"
 description = "A Django app that seamlessly integrates EditorJS, a powerful block-styled editor with a clean, intuitive interface."
 authors = ["Suraj Singh Bisht <surajsinghbisht054@gmail.com>"]
 license = "MIT"
@@ -27,9 +27,8 @@ keywords = ["django", "editorjs2", "editorjs", "django-editorjs"]
 
 
 [tool.poetry.dependencies]
-python = ">=3.8"
-django = ">=3.2"
 nh3 = ">=0.2.15"
+django = ">=4.2"
 
 
 [build-system]

@@ -64,7 +64,11 @@ class EditorJsWidget(forms.Widget):
         )
         
     def format_value(self, value):
-        return editorjs_field_preview_callback(json.loads(value or {}))
+        return editorjs_field_preview_callback(json.loads(value or '{}'))
+    
+    def value_from_datadict(self, data, files, name):
+        return super().value_from_datadict(data, files, name) or '{}'
+        
 
     
 class EditorJSFormField(JSONFormField):

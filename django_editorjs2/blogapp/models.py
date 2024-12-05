@@ -11,5 +11,6 @@ class Post(models.Model):
     def get_absolute_url(self):
         return reverse('django_editorjs2_blogapp:post_detail', kwargs={'pk': self.pk})
 
+    
     def __str__(self):
         return self.title
