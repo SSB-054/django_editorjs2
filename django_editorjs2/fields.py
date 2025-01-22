@@ -61,6 +61,7 @@ class EditorJsWidget(forms.Widget):
             static("django_editorjs2/marker.editorjs.min.js"),
             static("django_editorjs2/quote.editorjs.min.js"),
             static("django_editorjs2/table.editorjs.min.js"),
+            static("django_editorjs2/buttonlink.js"),
         )
         
     def format_value(self, value):

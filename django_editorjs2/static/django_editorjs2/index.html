@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+</head>
+
+<body>
+    <div id="editorjs"></div>
+
+    <button id="save-button">Save</button>
+    <pre id="output"></pre>
+
+    <script>
+        class LinkButton {
+            static get toolbox() {
+                return {
+                    title: 'Button',
+                    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/></svg>'
+                };
+            }
+
+            constructor({ data, api }) {
+                this.api = api;
+                this.data = {
+                    title: data.title || '',
+                    description: data.description || '',
+                    link: data.link || '#',
+                    color: data.color || "black", 
+                    backgroundColor: data.backgroundColor || "white", 
+                    borderColor: data.borderColor || "rgba(0, 0, 0, 0.1)"
+                };
+                this.redraw = ()=>{}
+
+            }
+
+
+            render() {
+                const data = this.data;
+                const wrapper = document.createElement('div');
+                wrapper.classList.add('cdx-block')
+                wrapper.classList.add('cdx-button-links');
+                wrapper.style.margin = "8px auto";
+                wrapper.style.display = "flex";
+                wrapper.style.flexDirection = "column";
+                wrapper.style.gap = "4px";
+                wrapper.style.padding = "12px";
+
+                const titleInput = document.createElement('div');
+                titleInput.classList.add('cdx-input')
+                titleInput.contentEditable = true;
+                titleInput.innerText = this.data.title;
+                titleInput.setAttribute('data-placeholder', 'Button Title');
+
+                const descriptionInput = document.createElement('div');
+                descriptionInput.classList.add('cdx-input')
+                descriptionInput.contentEditable = true;
+                descriptionInput.innerText = this.data.description;
+                descriptionInput.setAttribute('data-placeholder', 'Button Description');
+
+                const onClickLink = document.createElement('div');
+                onClickLink.classList.add('cdx-input')
+                onClickLink.contentEditable = true;
+                onClickLink.innerText = this.data.description;
+                onClickLink.setAttribute('data-placeholder', 'https://example.com');
+
+
+                // Apply styles based on settings
+                wrapper.style.color = this.data.color;
+                wrapper.style.fontFamily = this.data.fontFamily;
+
+                const previewButton = document.createElement('div');
+                const updatePreviewButton = () =>{
+                    this.data.title = titleInput.innerText || 'Untitled';
+                    this.data.description = descriptionInput.innerText;
+                    this.data.link = onClickLink.innerText || '#';
+                    previewButton.innerHTML = `
+                    <div style="color: var(--grayText);font-size: small;margin: 4px auto;">Preview</div>
+                    <a href="${this.data.link}" role="button" style="
+border: 1px solid ${this.data.borderColor||'rgba(0, 0, 0, 0.1)'};
+background: ${this.data.backgroundColor||'white'};
+border-radius: 8rem;
+box-shadow: 0 4px 6px -1px ${this.data.borderColor||'rgba(0, 0, 0, 0.1)'}, 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+box-sizing: border-box;
+cursor: pointer;
+text-decoration: none;
+display: flex;
+flex-direction: column;
+align-items: center;
+color: ${this.data.color||'black'};
+justify-content: center;
+line-height: 1.15;
+text-align: center;
+appearance: button;
+padding: 8px;">
+                        <strong>${this.data.title}</strong>
+                        <span>${this.data.description || 'something to say'}</span>
+                    </a>`;
+
+                }
+                titleInput.addEventListener("input", updatePreviewButton);
+                descriptionInput.addEventListener("input", updatePreviewButton);
+                onClickLink.addEventListener("input", updatePreviewButton);
+                updatePreviewButton();
+                this.redraw = updatePreviewButton;
+                wrapper.appendChild(titleInput);
+                wrapper.appendChild(descriptionInput);
+                wrapper.appendChild(onClickLink)
+                wrapper.appendChild(previewButton);
+                return wrapper;
+            }
+
+            save(blockContent) {
+                return this.data
+            }
+            renderSettings() {
+                const themeColors = {
+                    blue: {
+                        color: '#fff',
+                        background: '#2980b9',
+                        borderColor: '#2980b9'
+                    },
+                    green: {
+                        color: '#fff',
+                        background: '#27ae60',
+                        borderColor: '#27ae60'
+                    },
+                    red: {
+                        color: '#fff',
+                        background: '#e74c3c',
+                        borderColor: '#e74c3c'
+                    },
+                    light: {
+                        color: '#2e3138',
+                        background: '#ecf0f1',
+                        borderColor: '#ecf0f1'
+                    },
+                    gray: {
+                        color: '#fff',
+                        background: '#5c6370',
+                        borderColor: '#5c6370'
+                    },
+                    dark: {
+                        color: '#fff',
+                        background: '#2e3138',
+                        borderColor: '#2e3138'
+                    }
+                };
+                
+                function applyTheme(element, themeName) {
+                    // Check if the themeName exists in themeColors
+                    const theme = themeColors[themeName];
+                    if (!theme) {
+                        console.error(`Theme '${themeName}' not found`);
+                        return;
+                    }
+
+                    // Apply the theme styles to each element
+                    element.style.color = theme.color;
+                    element.style.backgroundColor = theme.background;
+                    element.style.borderColor = theme.borderColor;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = '<span class="ce-popover-item__title" style="margin-right: 4px;">Color</span>'
+                wrapper.style.display="flex";
+                wrapper.style.flexWrap = "wrap";
+                wrapper.style.gap = "2px";
+                wrapper.style.padding = "4px";
+                Object.keys(themeColors).forEach(themeName => {
+                    const div = document.createElement('div');
+                    div.classList.add("ce-popover-item");
+                    applyTheme(div, themeName)
+                    div.style.width = '16px';
+                    div.style.height = '16px';
+                    div.style.borderRadius = '4px';
+                    div.style.cursor = 'pointer';
+                    div.addEventListener("click", ()=>{
+                        const theme = themeColors[themeName];
+                        this.data.color = theme.color;
+                        this.data.backgroundColor = theme.background;
+                        this.data.borderColor = theme.borderColor;
+                        this.redraw();
+                    });
+                    wrapper.appendChild(div);
+                });
+                return wrapper;
+            }
+
+        }
+        
+        const editor = new EditorJS({
+            autofocus: true,
+            tools: {
+                button: LinkButton,
+            },
+        });
+        const saveButton = document.getElementById('save-button');
+        const output = document.getElementById('output');
+
+        saveButton.addEventListener('click', () => {
+            editor.save().then(savedData => {
+                output.innerHTML = JSON.stringify(savedData, null, 4);
+            })
+        })
+    </script>
+</body>
+
+</html>
