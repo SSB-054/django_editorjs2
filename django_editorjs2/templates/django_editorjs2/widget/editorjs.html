@@ -5,6 +5,10 @@
         border-radius: 4px;
         padding: 1.15rem;
         min-width: 420px;
+        color: black;
+    }
+    .cdx-input {
+        color: black;
     }
 </style>
 <textarea style="display: none;" {% include "django/forms/widgets/attrs.html" %} name="{{ widget.name }}"></textarea>
@@ -53,7 +57,7 @@
         }
         const initial_json = JSON.parse(document.getElementById('{{editorJs_initial_json}}').textContent) || {};
         document.querySelector('[name="{{ widget.name }}"]').value = document.getElementById('{{editorJs_initial_json}}').textContent;
-        const editor = new EditorJS({
+        let EditorJsConfig = {
             holder: 'editorjs-{{ widget.name }}',
             autofocus: true,
             data: initial_json,
@@ -117,6 +121,7 @@
 
                     },
                 },
+
             },
             onChange: function () {
                 editor.save().then((outputData) => {
@@ -125,9 +130,11 @@
                     console.error('Saving failed:', error);
                 });
             },
-        });
-       
-
+        };
+        if(window?.updateEditorJsConfig){
+            EditorJsConfig = window.updateEditorJsConfig(EditorJsConfig);
+        }
+        const editor = new EditorJS(EditorJsConfig);
     })
 
 </script>

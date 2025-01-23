@@ -133,6 +133,13 @@ article = Article.objects.first()
 # this will render html
 article.content_preview()
 ```
+## Customize new EditorJS(Config) Variable
+```javascript
+// Override default configuration => new EditorJS(Config)
+window.updateEditorJsConfig(config)=>{
+    return config
+}
+```
 
 ## Custom Preprocessors and Callbacks
 
